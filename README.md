@@ -13,8 +13,11 @@ Concerns the development of the machine learning backend inference for the Notab
 ## Inference:
 
 * ONNX python model to android inference 
+
   https://github.com/onnx/onnx
+  
   https://onnx.ai/
+  
 * OpenCV deep learned model for android inference
 
 ### Kanban:
