@@ -41,7 +41,7 @@ def sparse_tensor_to_strs(sparse_tensor):
     indices= sparse_tensor[0][0]
     values = sparse_tensor[0][1]
     dense_shape = sparse_tensor[0][2]
-
+    
     strs = [ [] for i in range(dense_shape[0]) ]
 
     string = []

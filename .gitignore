@@ -1,2 +1,5 @@
-
-Semantic-Model/semantic_model.data-00000-of-00001
+ML/models/frozen.pb
+ML/models/frozen_s.pb
+ML/models/frozen2.pb
+ML/models/semantic_model.data-00000-of-00001
+RESOURCES/Semantic-Model/semantic_model.data-00000-of-00001
