@@ -1,6 +1,3 @@
-# tf-deep-omr
-
-TensorFlow code to perform end-to-end Optical Music Recognition on monophonic scores through Convolutional Recurrent Neural Networks and CTC-based training.
 
 ## Citation
 
@@ -8,27 +5,8 @@ This repository was used for the experiments reported in the paper:
 
 [End-to-End Neural Optical Music Recognition of Monophonic Scores](http://www.mdpi.com/2076-3417/8/4/606)
 
-```
-@Article{Calvo-Zaragoza2018,
-  AUTHOR = {Calvo-Zaragoza, Jorge and Rizo, David},
-  TITLE = {End-to-End Neural Optical Music Recognition of Monophonic Scores},
-  JOURNAL = {Applied Sciences},
-  VOLUME = {8},
-  YEAR = {2018},
-  NUMBER = {4},
-  ARTICLE NUMBER = {606},
-  URL = {http://www.mdpi.com/2076-3417/8/4/606},
-  ISSN = {2076-3417},
-  DOI = {10.3390/app8040606}
-}
-```
-
-## Corpora
-
-This repository is intended for the Printed Images of Music Staves (PrIMuS) dataset.
 
 PrIMuS can be donwloaded from https://grfia.dlsi.ua.es/primus/
-
 
 ## Training
 
@@ -109,11 +87,3 @@ The ground-truth of this example is given in `Data/Example/000051652-1_2_1.agnos
 ``
 clef.C-L1	accidental.flat-L4	accidental.flat-L2	accidental.flat-S3	digit.2-L4	digit.4-L2	digit.2-S5	digit.3-S5	multirest-L3	barline-L1	rest.quarter-L3	    rest.eighth-L3	note.eighth-L4	barline-L1	note.quarter-L4	    dot-S4	note.eighth-L3	barline-L1	note.quarter-S5	    dot-S5	note.eighth-L5	barline-L1	note.eighth-S4	note.eighth-S4	rest.quarter-L3	barline-L1
 ``
-
-As discussed in the paper, this representation often misses the last barline.
-
-
-## Contact: 
-
-* Jorge Calvo Zaragoza (jcalvo@dlsi.ua.es)
-
