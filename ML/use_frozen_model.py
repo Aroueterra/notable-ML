@@ -31,7 +31,7 @@ args = parser.parse_args()
 
 tf_v1.reset_default_graph()
 sess = tf_v1.InteractiveSession()
-eta_path = 'C:/Users/aroue/Downloads/Documents/@ML/MODELS/tf-end-to-end/Models/frozen_model.pb'
+eta_path = r'C:\Users\aroue\Downloads\Documents\@ML\notable-ML\ML\models\frozen_model.pb'
 # Read the dictionary
 dict_file = open("Data/vocabulary_semantic.txt",'r')
 dict_list = dict_file.read().splitlines()
@@ -89,7 +89,9 @@ seq_len = graph.get_tensor_by_name("seq_lengths:0")
 rnn_keep_prob = graph.get_tensor_by_name("keep_prob:0")
 height_tensor = graph.get_tensor_by_name("input_height:0")
 width_reduction_tensor = graph.get_tensor_by_name("width_reduction:0")
-logits = tf_v1.get_collection("logits")[0]
+printer = tf_v1.get_default_graph().get_all_collection_keys()
+print(printer)
+#logits = tf_v1.get_collection("logits")[0]
 
 # Constants that are saved inside the model itself
 WIDTH_REDUCTION, HEIGHT = sess.run([width_reduction_tensor, height_tensor])

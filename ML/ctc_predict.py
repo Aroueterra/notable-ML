@@ -42,19 +42,36 @@ seq_len = graph.get_tensor_by_name("seq_lengths:0")
 rnn_keep_prob = graph.get_tensor_by_name("keep_prob:0")
 height_tensor = graph.get_tensor_by_name("input_height:0")
 width_reduction_tensor = graph.get_tensor_by_name("width_reduction:0")
-logits = tf_v1.get_collection("logits")[0]
-
+logits = graph.get_tensor_by_name("fully_connected/BiasAdd:0")
+#logits = tf_v1.get_collection("logits")[0]
+print("[Variables]")
+print(logits, end='\n')
+print(logits.name, end='\n')
 # Constants that are saved inside the model itself
-WIDTH_REDUCTION, HEIGHT = sess.run([width_reduction_tensor, height_tensor])
-
+#WIDTH_REDUCTION, HEIGHT = sess.run([width_reduction_tensor, height_tensor])
+print("WIDTH:")
+#print(WIDTH_REDUCTION)
+print("HEIGHT:")
+#print(HEIGHT)
+print("SEQ Tensor:")
+print(seq_len)
 decoded, _ = tf_v1.nn.ctc_greedy_decoder(logits, seq_len)
 
+
+
+#decodeds = sess.run(decoded)
+#print(decodeds)
+
+
 image = cv2.imread(args.image,0)
-image = ctc_utils.resize(image, HEIGHT)
+image = ctc_utils.resize(image, 128)
 image = ctc_utils.normalize(image)
 image = np.asarray(image).reshape(1,image.shape[0],-1,1)
 
-seq_lengths = [ image.shape[2] / WIDTH_REDUCTION ]
+seq_lengths = [ image.shape[2] / 16 ]
+#seq_lengths = [ image.shape[2] / WIDTH_REDUCTION ]
+print("SEQ type:")
+seq_lengths = [53.6875]
 
 prediction = sess.run(decoded,
                       feed_dict={
@@ -62,10 +79,14 @@ prediction = sess.run(decoded,
                           seq_len: seq_lengths,
                           rnn_keep_prob: 1.0,
                       })
-
+type(prediction)
+print(prediction)
+type(decoded)
+print(decoded)
+tf_v1.print(decoded)
 str_predictions = ctc_utils.sparse_tensor_to_strs(prediction)
 for w in str_predictions[0]:
-    print (int2word[w]),
+    #print (int2word[w]),
     print ('\t'),
 
 # form string of detected musical notes

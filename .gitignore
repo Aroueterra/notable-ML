@@ -1,3 +1,5 @@
+ML/.ipynb_checkpoints
+ML/__pycache__
 ML/models/frozen.pb
 ML/models/frozen_s.pb
 ML/models/frozen2.pb

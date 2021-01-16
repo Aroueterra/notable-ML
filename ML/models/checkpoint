@@ -1,2 +1,2 @@
-model_checkpoint_path: "C:/Users/aroue/Downloads/Documents/@ML/MODELS/tf-end-to-end/models/semantic_model"
-all_model_checkpoint_paths: "C:/Users/aroue/Downloads/Documents/@ML/MODELS/tf-end-to-end/models/semantic_model"
+model_checkpoint_path: "C:/Users/aroue/Downloads/Documents/@ML/notable-ML/ML/models/semantic_model"
+all_model_checkpoint_paths: "C:/Users/aroue/Downloads/Documents/@ML/notable-ML/ML/models/semantic_model"
