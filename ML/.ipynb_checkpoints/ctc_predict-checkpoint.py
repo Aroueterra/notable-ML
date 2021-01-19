@@ -57,7 +57,8 @@ print("SEQ Tensor:")
 print(seq_len)
 decoded, _ = tf_v1.nn.ctc_greedy_decoder(logits, seq_len)
 
-
+for op in tf_v1.get_default_graph().get_operations():
+    print(str(op.name))
 
 #decodeds = sess.run(decoded)
 #print(decodeds)
