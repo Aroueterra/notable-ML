@@ -1,35 +1,41 @@
-#To make tf 2.0 compatible with tf1.0 code, we disable the tf2.0 functionalities
-#tf.disable_eager_execution()
+from segmenter import Slice
 import os
-import cv2
 import io
+import cv2
+import time
 import logging
 import argparse
 import ctc_utils
 import numpy as np
+from segmenter.slicer import Slice
+import silence_tensorflow.auto
 import tensorflow as tf
 import simpleaudio as sa
 from pathlib import Path
-
 from midi.player import *
+from audio_to_midi.main import main as MIDI
 import tensorflow.compat.v1 as tf_v1
 from scipy.io.wavfile import write as WAV
 import tensorflow.python.util.deprecation as deprecation
-tf.get_logger().setLevel('FATAL')
-tf.autograph.set_verbosity(1)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+start_time = time.time()
 tf_v1.compat.v1.disable_eager_execution()
-deprecation._PRINT_DEPRECATION_WARNINGS = False
-logging.getLogger('tensorflow').setLevel(logging.FATAL)
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-
-parser = argparse.ArgumentParser(description='Decode a music score image with a trained model (CTC).')nargs='?',
-parser.add_argument('-image',  dest='image', type=str, required=True, help='Path to the input image.')
+parser = argparse.ArgumentParser(description='Decode a music score image with a trained model (CTC).')
+parser.add_argument('-sheet',  dest='sheet', type=str, required=True, help='Path to the whole sheet.')
+parser.add_argument('-image',  dest='image', type=str, required=True, help='Path to the prediction input.')
 parser.add_argument('-model', dest='model', type=str, required=True, help='Path to the trained model.')
 parser.add_argument('-vocabulary', dest='voc_file', type=str, required=True, help='Path to the vocabulary file.')
 parser.add_argument('-type',  dest='type', type=str, nargs='?', help='Path to the output type.')
+parser.add_argument('-seq',  dest='seq', type=str, nargs='?', help='Singles or sequential.')
 args = parser.parse_args()
+
+'''
+Launch Slice from slicer, perform binarization and divide the sheets
+
+'''
+slices = Slice(args.sheet)
+print('Slices made? ' + str(slices))
+
 
 tf_v1.reset_default_graph()
 sess = tf_v1.InteractiveSession()
@@ -55,15 +61,15 @@ rnn_keep_prob = graph.get_tensor_by_name("keep_prob:0")
 height_tensor = graph.get_tensor_by_name("input_height:0")
 width_reduction_tensor = graph.get_tensor_by_name("width_reduction:0")
 logits = graph.get_tensor_by_name("fully_connected/BiasAdd:0")
-#logits = tf_v1.get_collection("logits")[0]
 
 # Constants that are saved inside the model itself
 WIDTH_REDUCTION, HEIGHT = sess.run([width_reduction_tensor, height_tensor])
 
 decoded, _ = tf_v1.nn.ctc_greedy_decoder(logits, seq_len)
 
+#TODO: FIX THIS MESS
 path = Path(__file__).parent.absolute()
-
+sheet_path, sheet_name = os.path.split(args.sheet)
 mypath = Path().absolute()
 file_path = str(mypath) + '\\'
 file_forward = Path(args.image)
@@ -71,16 +77,13 @@ absolute_path = Path(file_path + args.image)
 absolute_str = str(absolute_path)
 file_name = file_forward.name.split('.')[-2]
 file_ext = str(absolute_path).split('.')[1]
-#flen = len(file_parts)
 counter = 1
 all_predictions=[]
-bassclef= ['clef-F3','clef-F4','clef-F5']
-print("absolute initial " + str(mypath))
-print("File name " + file_name)
-print("File ext " + file_ext)
-print(str(absolute_path))
-print(absolute_path.is_file())
+
+print("Input of slices? "+str(absolute_path))
+print("=================================PREDICT=================================")
 while absolute_path.exists():
+    print("    ++Adding one more song to playlist " + str(time.time() - start_time))
     file_name = absolute_str.split('.')[-2]
     image = cv2.imread(str(absolute_path),0)
     image = ctc_utils.resize(image, 128)
@@ -99,14 +102,7 @@ while absolute_path.exists():
         parsed_predictions += int2word[w] + '\n' 
     absolute_path = Path(file_name[:-1] + str(counter) + '.' + file_ext)
     counter+=1
-    #check for bass clef matches and discard result
-#     matching = [s for s in SEMANTIC if any(xs in s for xs in bassclef)]
-#     print ("match? " + matching)
-#     if matching:
-#         continue
     all_predictions.append(parsed_predictions)
-    
-len(all_predictions)
     
 if __name__ == '__main__':
     SEMANTIC = ''
@@ -120,7 +116,9 @@ if __name__ == '__main__':
         directory = 'Data\\raw\\'
     else:
         directory = 'Data\\perfect\\'
-            
+    all_txt = ''.join(map(str, all_predictions))
+    with open(directory + 'all_predictions'+'.txt', 'w') as file:
+        file.write(all_txt)       
     for SEMANTIC in all_predictions:
         # gets the audio file
         audio = get_sinewave_audio(SEMANTIC)
@@ -132,24 +130,28 @@ if __name__ == '__main__':
         audio = audio.astype(np.int16)
         playlist.append(audio)
         
-        print("added one song to playlist")
-        
-            
-        
         with open(directory + 'predictions'+ str(export) +'.txt', 'w') as file:
             file.write(SEMANTIC)
-        export+=1
-
-    len(playlist)
-    for song in playlist:
-        output_file = directory + 'staff' + str(track) + '.wav'
-        WAV(output_file, 44100, song)
-        print("created wav file")
-        track+=1
-        #play_obj = sa.play_buffer(song, 1, 2, 44100)
-        #outputs to the console
-        #if play_obj.is_playing():
-        #    print("\nplaying..." + str(track))
-        #    print(f'\n{SEMANTIC}')  
-        #stop playback when done
-        #play_obj.wait_done()
+        export+=1        
+        
+    if(playlist):
+        if(args.seq == "false"):
+            for song in playlist:
+                output_file = directory + 'staff' + str(track) + '.wav'
+                WAV(output_file, 44100, song)
+                print("created wav file " + str(time.time() - start_time))
+                track+=1
+        else:
+            output_file = directory + sheet_name[:-4] + '.wav'
+            full_song = None
+            for song in playlist:
+                if (full_song) is None:
+                    full_song = song
+                else:
+                    full_song = np.concatenate((full_song, song))
+                    
+            WAV(output_file, 44100, full_song)
+            #MIDI(output_file)
+            print("Generated full song")
+            
+    print("FULL PROCESS COMPLETED in: " + str(time.time() - start_time) )
